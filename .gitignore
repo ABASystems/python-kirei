@@ -1,0 +1,43 @@
+var
+project
+*.pyc
+*.sublime-project
+*.sublime-workspace
+.DS_Store
+debug.log
+env
+*.swp
+abas/settings/local.py
+.sass-cache/
+.coverage
+coverage.xml
+htmlcov
+celerybeat-schedule.*
+
+# node modules
+node_modules
+
+# frontend build cache
+.module-cache
+
+# built js / css files
+abas/apps/core/static/css/master*.css
+abas/apps/core/static/css/print*.css
+
+# Emacs temporary files
+**~
+
+# docker config
+docker-compose.yml
+
+.hypothesis
+ghostdriver.log
+
+import.log
+
+# used to setup new tenants but should not be in SCM
+secure/star_aba-systems_com_au.crt
+secure/star_aba-systems_com_au.key
+
+# used by those that still want to be able to do stuff while invoke isn't fully implemented.
+fabfile.py

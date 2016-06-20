@@ -1,8 +1,20 @@
+import re
 import six
 from decimal import Decimal, InvalidOperation
+from datetime import timedelta
+import logging
 
 from dateutil.parser import parse as _parse_date
 from django.core.exceptions import ValidationError
+import numpy as np
+
+from .utils import is_empty
+
+
+logger = logging.getLogger(__name__)
+
+
+DURATION_PROG = re.compile(r'((?P<days>\d*\.?\d+?)\s*(?:days|d))?((?P<hours>\d*\.?\d+?)\s*(?:hours|hrs?|h))?((?P<minutes>\d*\.?\d+?)\s*(?:minutes?|m))?((?P<seconds>\d*\.?\d+?)\s*(?:seconds|s))?', re.I)
 
 
 def parse_date(date_str):
@@ -39,3 +51,33 @@ def parse_decimal(value):
         return Decimal(value)
     except InvalidOperation:
         raise ValidationError('Unable to parse decimal "{}"'.format(value))
+
+
+def parse_duration(duration_str, error='raise'):
+    if is_empty(duration_str):
+        return duration_str
+    parts = DURATION_PROG.search(duration_str)
+    if not parts:
+        msg = 'Failed to parse duration: "{}".'.format(duration_str)
+        if error == 'raise':
+            raise Exception(msg)
+        elif error == 'log':
+            logger.error(msg)
+        return np.nan
+    parts = parts.groupdict()
+    time_params = {}
+    for (name, param) in parts.items():
+        if param:
+            time_params[name] = float(param)
+    if not time_params:
+        msg = 'Failed to parse duration: "{}".'.format(duration_str)
+        if error == 'raise':
+            raise Exception(msg)
+        elif error == 'log':
+            logger.error(msg)
+        return np.nan
+    return timedelta(**time_params)
+
+
+def duration_parser(error='raise'):
+    return lambda x: parse_duration(x, error)
